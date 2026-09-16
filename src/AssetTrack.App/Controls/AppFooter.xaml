@@ -1,0 +1,10 @@
+<UserControl x:Class="AssetTrack.App.Controls.AppFooter"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <TextBlock Style="{StaticResource CaptionText}" HorizontalAlignment="Center" TextWrapping="Wrap">
+        <Run Text="Powered by " />
+        <Hyperlink NavigateUri="https://masimaziz.com/" RequestNavigate="Hyperlink_RequestNavigate">masimaziz.com</Hyperlink>
+        <Run Text=" | " />
+        <Hyperlink NavigateUri="mailto:asimhashmi47@gmail.com" RequestNavigate="Hyperlink_RequestNavigate">asimhashmi47@gmail.com</Hyperlink>
+    </TextBlock>
+</UserControl>

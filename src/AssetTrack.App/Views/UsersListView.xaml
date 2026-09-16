@@ -1,0 +1,140 @@
+<UserControl x:Class="AssetTrack.App.Views.UsersListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:AssetTrack.App.Converters">
+    <UserControl.Resources>
+        <conv:CountToVisibilityConverter x:Key="CountToVisibility" />
+        <conv:ActiveToLabelConverter x:Key="ActiveLabel" />
+        <conv:UserRoleToLabelConverter x:Key="UserRoleToLabel" />
+        <conv:SortIndicatorVisibilityConverter x:Key="SortIndicatorVisibility" />
+        <conv:SortDirectionArrowConverter x:Key="SortDirectionArrow" />
+        <conv:EnumEqualsConverter x:Key="StringEqualsConverter" />
+        <Style x:Key="SortHeader" TargetType="Button" BasedOn="{StaticResource SortableHeaderButton}">
+            <Setter Property="Command" Value="{Binding DataContext.SortByColumnCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Users" Style="{StaticResource H1Text}" />
+                <TextBlock Text="People who can hold company assets." Style="{StaticResource SubtleText}" Margin="0,4,0,0" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Content="Download Excel" Style="{StaticResource DownloadExcelButton}" Margin="0,0,8,0"
+                        Command="{Binding ExportToExcelCommand}" />
+                <Button Content="Add user" Style="{StaticResource PrimaryButton}" Command="{Binding AddUserCommand}" />
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,14">
+            <TextBox Style="{StaticResource SearchTextBox}" Width="240" Margin="0,0,10,0"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Tag="Search name, username, company, city" />
+            <RadioButton Style="{StaticResource ChipToggleButton}" GroupName="RoleFilter" Content="All roles" Margin="0,0,6,0"
+                         IsChecked="{Binding RoleFilter, Converter={StaticResource StringEqualsConverter}, ConverterParameter={x:Null}, Mode=OneWay}"
+                         Click="AllRoles_Click" />
+            <RadioButton Style="{StaticResource ChipToggleButton}" GroupName="RoleFilter" Content="Standard" Margin="0,0,6,0"
+                         IsChecked="{Binding RoleFilter, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Staff, Mode=OneWay}"
+                         Click="StandardRole_Click" />
+            <RadioButton Style="{StaticResource ChipToggleButton}" GroupName="RoleFilter" Content="Admin" Margin="0,0,14,0"
+                         IsChecked="{Binding RoleFilter, Converter={StaticResource StringEqualsConverter}, ConverterParameter=Admin, Mode=OneWay}"
+                         Click="AdminRole_Click" />
+            <RadioButton Style="{StaticResource ChipToggleButton}" GroupName="ActiveFilter" Content="All" Margin="0,0,6,0"
+                         IsChecked="{Binding ActiveFilter, Converter={StaticResource StringEqualsConverter}, ConverterParameter={x:Null}, Mode=OneWay}"
+                         Click="AllActive_Click" />
+            <RadioButton Style="{StaticResource ChipToggleButton}" GroupName="ActiveFilter" Content="Active" Margin="0,0,6,0"
+                         IsChecked="{Binding ActiveFilter, Converter={StaticResource StringEqualsConverter}, ConverterParameter=True, Mode=OneWay}"
+                         Click="ActiveOnly_Click" />
+            <RadioButton Style="{StaticResource ChipToggleButton}" GroupName="ActiveFilter" Content="Inactive"
+                         IsChecked="{Binding ActiveFilter, Converter={StaticResource StringEqualsConverter}, ConverterParameter=False, Mode=OneWay}"
+                         Click="InactiveOnly_Click" />
+        </StackPanel>
+
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0" VerticalAlignment="Top">
+            <Grid>
+                <DataGrid x:Name="UsersGrid" Style="{StaticResource AppDataGrid}" ItemsSource="{Binding Users}"
+                          Visibility="{Binding Users.Count, Converter={StaticResource CountToVisibility}, ConverterParameter=Invert}"
+                          MouseDoubleClick="UsersGrid_MouseDoubleClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding User.DisplayName}" Width="1.3*">
+                            <DataGridTextColumn.Header>
+                                <Button Style="{StaticResource SortHeader}" CommandParameter="DisplayName">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="NAME" />
+                                        <TextBlock Margin="4,0,0,0" FontSize="9"
+                                                   Visibility="{Binding DataContext.SortBy, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SortIndicatorVisibility}, ConverterParameter=DisplayName}"
+                                                   Text="{Binding DataContext.SortAscending, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SortDirectionArrow}}" />
+                                    </StackPanel>
+                                </Button>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="USERNAME" Binding="{Binding User.Username}" Width="*" />
+                        <DataGridTextColumn Header="ROLE" Binding="{Binding User.Role, Converter={StaticResource UserRoleToLabel}}" Width="70" />
+                        <DataGridTextColumn Binding="{Binding User.Company}" Width="1.1*">
+                            <DataGridTextColumn.Header>
+                                <Button Style="{StaticResource SortHeader}" CommandParameter="Company">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="COMPANY" />
+                                        <TextBlock Margin="4,0,0,0" FontSize="9"
+                                                   Visibility="{Binding DataContext.SortBy, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SortIndicatorVisibility}, ConverterParameter=Company}"
+                                                   Text="{Binding DataContext.SortAscending, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SortDirectionArrow}}" />
+                                    </StackPanel>
+                                </Button>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="DEPARTMENT" Binding="{Binding User.Division}" Width="*" />
+                        <DataGridTextColumn Binding="{Binding User.City}" Width="*">
+                            <DataGridTextColumn.Header>
+                                <Button Style="{StaticResource SortHeader}" CommandParameter="City">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="CITY" />
+                                        <TextBlock Margin="4,0,0,0" FontSize="9"
+                                                   Visibility="{Binding DataContext.SortBy, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SortIndicatorVisibility}, ConverterParameter=City}"
+                                                   Text="{Binding DataContext.SortAscending, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SortDirectionArrow}}" />
+                                    </StackPanel>
+                                </Button>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="ASSETS" Binding="{Binding AssetCount}" Width="60" />
+                        <DataGridTextColumn Header="STATUS" Binding="{Binding User.IsActive, Converter={StaticResource ActiveLabel}}" Width="70" />
+                        <DataGridTemplateColumn Header="" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Open" Style="{StaticResource LinkButton}"
+                                            Command="{Binding DataContext.OpenUserCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="3" Margin="0,14,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Style="{StaticResource SubtleText}" VerticalAlignment="Center">
+                <Run Text="{Binding TotalCount, Mode=OneWay}" /><Run Text=" total" />
+            </TextBlock>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <TextBlock Text="{Binding Page, StringFormat='Page {0} of '}" Style="{StaticResource SubtleText}" VerticalAlignment="Center" Margin="0,0,4,0" />
+                <TextBlock Text="{Binding TotalPages}" Style="{StaticResource SubtleText}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <Button Content="Previous" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" Command="{Binding PreviousPageCommand}" />
+                <Button Content="Next" Style="{StaticResource SecondaryButton}" Command="{Binding NextPageCommand}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
